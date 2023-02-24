@@ -4,6 +4,7 @@ const userModel = require("./user");
 const jwt = require('jsonwebtoken');
 dotenv.config()
 
+mongoose.set('strictQuery', false);
 mongoose
   .connect(
     "mongodb+srv://" +
@@ -18,6 +19,7 @@ mongoose
     {
       useNewUrlParser: true, 
       useUnifiedTopology: true,
+      
     }
   )
   .catch((error) => console.log(error));
@@ -59,7 +61,7 @@ async function findUserByNameandPassword(username, password) {
 }
 
 async function findUserByName(name) {
-  return await userModel.find({ username: name });
+  return await userModel.findOne({ username: name });
 }
 
 

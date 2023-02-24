@@ -1,8 +1,11 @@
 
 import axios from 'axios'
+import { useAuth } from "./context/AuthProvider";
 
 export const Signup = () =>{
     let passwordChecker = new RegExp('(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]+)')
+    const { value } = useAuth();
+  
 
     async function setData(e)
     {   
@@ -16,7 +19,11 @@ export const Signup = () =>{
         {
             alert("One or more fields are empty")
         }
-        if(!passwordChecker.test(password))
+        else if (password !== second_password)
+        {
+            alert("Passwords do not match!")
+        }
+        else if(!passwordChecker.test(password))
         {
             alert("Password must contain at least one capital letter,one number, and one symbol!")
         }
@@ -25,7 +32,7 @@ export const Signup = () =>{
             if(password === second_password)
             {
                 try {
-                    const response = await axios.post('http://localhost:5000/register', user);
+                    const response = await axios.post('https://localhost:5000/register', user);
                     if(response.data === "Username exists already!")
                     {
                         alert(response.data)
@@ -33,6 +40,7 @@ export const Signup = () =>{
                     else if(response.data)
                     {
                         alert("Signed up!")
+                        value.onLogin(response.data)
                     }
                     else
                     {

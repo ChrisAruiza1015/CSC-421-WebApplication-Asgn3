@@ -5,21 +5,36 @@ const userServices = require('./models/user-services');
 const jwtServices = require('./models/jwt-services')
 const app = express();
 const port = 5000;
-
-
+const https = require("https");
+const fs = require("fs");
+const bcrypt = require("bcrypt")
 app.use(cors());
 app.use(express.json());
+const saltRounds = 10;
+
+https
+  .createServer(  {
+    key: fs.readFileSync("../react-frontend/reactcert/key.pem"),
+    cert: fs.readFileSync("../react-frontend/reactcert/cert.pem"),
+  },app)
+  .listen(port, ()=>{
+    console.log(`Example app listening at https://localhost:${port}`)
+  });
+
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
 app.get('/users', async (req, res) => {
-    const name = req.query['name'];
-    const job = req.query['job'];
+    
     try {
-        const result = await userServices.getUsers(name, job);
-        res.send({users_list: result});         
+        const result = await userServices.getUsers();
+        userList = result.map(user =>{
+          return {username: user.username}
+        })
+        res.send({userList: userList});         
     } catch (error) {
         console.log(error);
         res.status(500).send('An error ocurred in the server.');
@@ -35,17 +50,22 @@ app.post("/login", async (req, res) => {
     const password = req.body.password;
    
     try {
-        const result = await userServices.findUserByNameandPassword(username,password)
-        console.log("Result of findUserByNameandPassword",result)
-        if(result)
+        const user = await userServices.findUserByName(username)
+        if(user)
         {
+          if(await bcrypt.compare(password,user.password))
+          {
             let token = jwtServices.generateAccessToken(username)
             res.send(token)
+          }
+          else
+          {
+            res.send(null)
+          }
+            
         }
-        // const token = userServices.generateAccessToken({username: username})
-        // res.json(token)
-        
-        // res.send({ user: result });
+        else{ res.send(null)}
+       
       } catch (error) {
         console.log(error);
         res.status(500).send("An error ocurred in the server.");
@@ -55,16 +75,19 @@ app.post("/login", async (req, res) => {
 
 app.post("/register", async (req,res) => {
     const username = req.body.username;
-    const password = req.body.password;
+    const plainTextPassword = req.body.password;
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash(plainTextPassword,salt);
 
     try {
+        
         const result = await userServices.findUserByName(username)
-        console.log(result)
-        if(result.length === 0)
+       
+        if(result === null || result.length == 0)
         {
             let token = jwtServices.generateAccessToken(username)
             const user = {username: username, password: password}
-            const result2 = await userServices.addUser(user)
+            await userServices.addUser(user)
             res.send(token)
         }
         else
@@ -79,9 +102,7 @@ app.post("/register", async (req,res) => {
 
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
-});
+
 
 /*
 aaaa

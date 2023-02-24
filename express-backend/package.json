@@ -1,20 +1,24 @@
 {
-  "name": "expressjs-with-mongoose-localdb",
+  "name": "expressjs-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "backend_with_db.js",
+  "main": "backend.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon backend_with_db.js"
+    "dev": "nodemon backend.js"
   },
   "author": "Dr. da Silva",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "https": "^1.0.0",
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^6.0.10"
+    "mongoose": "^6.9.1",
+    "nodemon": "^2.0.20"
   },
   "devDependencies": {
     "nodemon": "^2.0.13",

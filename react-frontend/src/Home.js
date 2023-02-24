@@ -1,11 +1,19 @@
-import axios from 'axios'
+import axios from 'axios';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from "./context/AuthProvider";
-
+import React,  {useEffect} from 'react';
 
 export const Home = () => {
+    
     const { value } = useAuth();
-    value.setToken(getToken())
+    
+    
+     useEffect(() => {
+        
+        
+        value.setToken(getToken())    
+        
+     },[])
 
     async function validateUser(e)
     {   
@@ -15,8 +23,7 @@ export const Home = () => {
         const password = form.elements["password"].value
         const user = {username: username, password: password}
         try {
-            const response = await axios.post('http://localhost:5000/login',  user);
-            console.log("response.data",response.data)
+            const response = await axios.post('https://localhost:5000/login',  user);
             if(response.data)
             {
                 alert("Logged in!")
@@ -36,23 +43,21 @@ export const Home = () => {
        
     }
     function getToken() {
-        var nameEQ = "token=";
-        var ca = document.cookie.split(';');
-        for(var i=0;i < ca.length;i++) {
-            var c = ca[i];
-            
-            while (c.charAt(0) === ' '){
-                c = c.substring(1,c.length);
-            }
-            
-            if (c.indexOf(nameEQ) === 0){
-                return c.substring(nameEQ.length,c.length);
-            }
+        
+        var cookies = document.cookie.split(';');
+        var token_string = cookies.find(element => element.includes("token="))
+  
+        if(token_string)
+        {
+            var token_value = token_string.split("=")[1]
+            return token_value
         }
+        
         return null;
     }
 
     return (
+        
         <div className = "home">
         <h2>Home (Public)</h2>
             <form onSubmit={validateUser} id = "signin">
